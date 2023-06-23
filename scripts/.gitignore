@@ -1,4 +1,6 @@
 .env
+.DS_Store
 audio_files/
 video_transcriptions/
 scrapped_channels/
+transcriptions/

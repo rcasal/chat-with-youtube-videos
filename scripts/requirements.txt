@@ -38,3 +38,4 @@ websockets==11.0.3
 yarl==1.9.2
 youtube-dl==2021.12.17
 yt-dlp==2023.3.4
+youtube-transcript-api

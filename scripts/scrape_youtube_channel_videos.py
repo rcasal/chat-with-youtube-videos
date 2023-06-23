@@ -1,7 +1,7 @@
 import argparse
 import csv
 import yt_dlp
-
+import os
 
 def get_latest_videos(channel_url, num_videos):
     if channel_url.startswith('https://www.youtube.com/@'):
@@ -30,6 +30,11 @@ def get_latest_videos(channel_url, num_videos):
 
 def write_to_csv(video_data, output_file):
     fieldnames = ['url', 'title']
+    folder_path = os.path.dirname(output_file)
+
+    # Check if the folder exists, and create it if it doesn't
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
     with open(output_file, 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()

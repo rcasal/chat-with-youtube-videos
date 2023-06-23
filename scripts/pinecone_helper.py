@@ -41,7 +41,7 @@ def store_transcript(transcript, video_url, video_title):
     }]
 
     docs = splitter.create_documents([transcript], metadatas=metadatas)
-
+    # model='text-embedding-ada-002' by default
     embeddings = OpenAIEmbeddings(
         openai_api_key=os.environ.get("OPENAI_API_KEY"), )
     Pinecone.from_documents(
@@ -49,33 +49,28 @@ def store_transcript(transcript, video_url, video_title):
     )
 
 
-def main(videos_data, transcriptions_directory):
-    with open(videos_data, 'r') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            try:
-                video_id = row['url'].split('=')[-1]
-                json_file_path = os.path.join(
-                    transcriptions_directory, f"{video_id}.json")
-                with open(json_file_path, 'r') as json_file:
-                    data = json.load(json_file)
-                    transcript = data.get('text')
-                    if transcript:
-                        store_transcript(
-                            transcript, row['url'], row.get('title'))
-                    else:
-                        print(f"No transcript in {json_file_path}")
-            except KeyError as e:
-                print(f"Missing field: {e}")
+def main(transcriptions_directory):
+    for filename in os.listdir(transcriptions_directory):
+        if filename.endswith('.json'):
+            file_path = os.path.join(transcriptions_directory, filename)
+        
+        with open(file_path, 'r') as json_file:
+            data = json.load(json_file)
+            
+            # Extract the required values from the JSON data
+            video_url = data.get('url')
+            video_title = data.get('title')
+            transcript = data.get('concat_srt')
+            
+            # Call the store_transcript() function with the extracted values
+            store_transcript(transcript, video_url, video_title)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Save transcriptions in Pinecone')
-    parser.add_argument('videos_data', type=str,
-                        help='CSV file with video links and titles')
     parser.add_argument('transcriptions_directory', type=str,
                         help='Transcription output folder path')
     args = parser.parse_args()
 
-    main(args.audio_directory, args.transcriptions_directory)
+    main(args.transcriptions_directory)
